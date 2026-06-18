@@ -1,0 +1,9 @@
+*.bak
+*.bk
+*.egg-info
+*.env
+.cache
+__pycache__/
+contributors.txt
+dist
+temp_repo_clone
