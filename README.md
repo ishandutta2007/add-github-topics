@@ -96,10 +96,6 @@ Contributions are welcome! If you'd like to improve this tool:
 
 ---
 
-<p align="center">
-  Made with ❤️ by <a href="https://github.com/ishandutta2007">Ishan Dutta</a>
-</p>
-
 ## 📈 Star History
 <div align="center">
    <a href="https://www.star-history.com/repos=ishandutta2007%2Fadd-github-topics&type=date&legend=bottom-right">
@@ -110,3 +106,9 @@ Contributions are welcome! If you'd like to improve this tool:
     </picture>
    </a>
 </div>
+
+---
+
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/ishandutta2007">Ishan Dutta</a>
+</p>
