@@ -1,6 +1,6 @@
 # Add GitHub Topics
 
-A simple Python script to add topics (tags) to a GitHub repository using the GitHub API.
+A CLI tool to add topics (tags) to a GitHub repository using the GitHub API.
 
 ## Features
 
@@ -8,29 +8,35 @@ A simple Python script to add topics (tags) to a GitHub repository using the Git
 - Automatically fetches existing topics to avoid overwriting them.
 - Defaults to current repository information if run within a git repo.
 - Supports `.env` file for secure token management.
+- Installable via `pip` and usable as a command-line tool.
 
-## Prerequisites
+## Installation
 
-- Python 3.x
-- `requests`
-- `python-dotenv`
+You can install the package locally for development:
 
-Install dependencies:
 ```bash
-pip install requests python-dotenv
+pip install .
+```
+
+Or install it directly from GitHub:
+
+```bash
+pip install git+https://github.com/ishandutta2007/add-github-topics.git
 ```
 
 ## Setup
 
-Create a `.env` file in the project root and add your GitHub Personal Access Token:
+Create a `.env` file in your current directory and add your GitHub Personal Access Token:
 ```env
 ADMIN_TOKEN=your_github_token_here
 ```
 
 ## Usage
 
+After installation, you can use the `add-github-topic` command:
+
 ```bash
-python add_topics.py <topic> [options]
+add-github-topic <topic> [options]
 ```
 
 ### Arguments
@@ -46,10 +52,17 @@ python add_topics.py <topic> [options]
 ### Example
 
 ```bash
-python add_topics.py python --username ishandutta2007 --reponame add-github-topics
+add-github-topic python --username ishandutta2007 --reponame add-github-topics
 ```
 
-If run inside the repository and `.env` is set up:
+If run inside a repository and `.env` is set up:
 ```bash
-python add_topics.py script
+add-github-topic script
+```
+
+## Development
+
+To install dependencies for development:
+```bash
+pip install -e .
 ```
