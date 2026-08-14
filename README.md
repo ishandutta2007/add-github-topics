@@ -112,6 +112,13 @@ Contributions are welcome! If you'd like to improve this tool:
 2. Install in editable mode: `pip install -e .`
 3. Submit a Pull Request!
 
+
+## 🛠️ Publish to PYPI
+
+```
+git tag v0.2.0 && git push origin v0.2.0
+```
+
 ---
 
 ## 📈 Star History
