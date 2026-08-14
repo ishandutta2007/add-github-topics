@@ -68,20 +68,38 @@ add-github-topic <topic> [options]
 
 | Option | Shortcut | Description | Default |
 | :--- | :--- | :--- | :--- |
-| `topic` | - | **(Mandatory)** The topic string to add. | - |
-| `--token` | - | Your GitHub Personal Access Token. | `ADMIN_TOKEN` from `.env` |
-| `--username` | - | Your GitHub username. | Detected from `git config` |
-| `--reponame` | - | Target repository name. | Current folder name |
+| `topics` | - | One or more topics to add (space- or comma-separated). | - |
+| `--token` | `-t` | Your GitHub Personal Access Token. | `ADMIN_TOKEN`, `GITHUB_TOKEN`, `GH_TOKEN` from `.env` |
+| `--username`, `--owner` | `-u` | Your GitHub username / organization. | Auto-detected from `git remote origin` |
+| `--reponame`, `--repo` | `-r` | Target repository name. | Auto-detected from `git remote origin` |
+| `--list` | `-l` | List all current topics for the repository. | `false` |
+| `--remove` | `-d` | Remove the specified topic(s) instead of adding. | `false` |
 
 ### Examples 📝
 
-**Add multiple tags sequentially:**
+**Add a single topic:**
 ```bash
-add-github-topic automation
-add-github-topic cli-tool
+add-github-topic python
 ```
 
-**Target a specific repository and user:**
+**Add multiple topics in one go:**
+```bash
+add-github-topic automation cli-tool devops
+# or comma-separated
+add-github-topic python,fastapi,docker
+```
+
+**List current topics:**
+```bash
+add-github-topic --list
+```
+
+**Remove topics:**
+```bash
+add-github-topic --remove cli-tool
+```
+
+**Target a specific repository and user/org:**
 ```bash
 add-github-topic machine-learning --username ishandutta2007 --reponame awesome-ml-project
 ```
