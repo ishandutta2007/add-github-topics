@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "add-github-topics"
-version = "0.2.0"
+version = "0.2.1"
 authors = [
   { name="Ishan Dutta", email="ishandutta2007@gmail.com" },
 ]

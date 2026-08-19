@@ -44,11 +44,32 @@ pip install add-github-topics
 
 ### 2. Configuration ⚙️
 
-Create a `.env` file in your project root or home directory to store your GitHub token:
+Set your GitHub token in any of the following ways (in order of priority):
 
-```env
-ADMIN_TOKEN=your_personal_access_token_here
-```
+1. **CLI Argument:**
+   ```bash
+   add-github-topic python --token ghp_your_token_here
+   ```
+
+2. **Environment Variable:**
+   - **Bash / Zsh:**
+     ```bash
+     export GITHUB_TOKEN=ghp_your_token_here
+     ```
+   - **PowerShell:**
+     ```powershell
+     $env:GITHUB_TOKEN = "ghp_your_token_here"
+     ```
+
+3. **`.env` File:**
+   Create a `.env` file in your repository or home directory:
+   ```env
+   GITHUB_TOKEN=ghp_your_token_here
+   ```
+   *(Also supports `GH_TOKEN` and legacy `ADMIN_TOKEN`)*
+
+4. **GitHub CLI (`gh`):**
+   If you already have [GitHub CLI](https://cli.github.com/) installed and logged in (`gh auth login`), the CLI will automatically fallback to `gh auth token` with zero manual configuration!
 
 ### 3. Basic Usage 🛠️
 
@@ -69,7 +90,7 @@ add-github-topic <topic> [options]
 | Option | Shortcut | Description | Default |
 | :--- | :--- | :--- | :--- |
 | `topics` | - | One or more topics to add (space- or comma-separated). | - |
-| `--token` | `-t` | Your GitHub Personal Access Token. | `ADMIN_TOKEN`, `GITHUB_TOKEN`, `GH_TOKEN` from `.env` |
+| `--token` | `-t` | Your GitHub Personal Access Token. | `GITHUB_TOKEN`, `GH_TOKEN`, `ADMIN_TOKEN` (environment / `.env`), or `gh auth token` |
 | `--username`, `--owner` | `-u` | Your GitHub username / organization. | Auto-detected from `git remote origin` |
 | `--reponame`, `--repo` | `-r` | Target repository name. | Auto-detected from `git remote origin` |
 | `--list` | `-l` | List all current topics for the repository. | `false` |

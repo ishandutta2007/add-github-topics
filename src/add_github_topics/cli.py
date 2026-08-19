@@ -110,23 +110,55 @@ def sanitize_topic(topic: str) -> str:
 
 def get_auth_token(cli_token=None):
     """
-    Retrieve GitHub token from CLI arg or environment variables.
-    Supports ADMIN_TOKEN, GITHUB_TOKEN, and GH_TOKEN.
+    Retrieve GitHub token from CLI arg or environment variables or gh CLI.
+    Prioritizes:
+    1. CLI argument (--token)
+    2. GITHUB_TOKEN (environment / .env)
+    3. GH_TOKEN (environment / .env)
+    4. ADMIN_TOKEN (environment / .env)
+    5. gh auth token (GitHub CLI if installed)
+    Returns (token_str, source_description).
     """
-    token = (
-        cli_token
-        or os.getenv("ADMIN_TOKEN")
-        or os.getenv("GITHUB_TOKEN")
-        or os.getenv("GH_TOKEN")
-    )
+    source = None
+    token = None
+
+    if cli_token:
+        token = cli_token
+        source = "--token CLI argument"
+    elif os.getenv("GITHUB_TOKEN"):
+        token = os.getenv("GITHUB_TOKEN")
+        source = "environment variable GITHUB_TOKEN"
+    elif os.getenv("GH_TOKEN"):
+        token = os.getenv("GH_TOKEN")
+        source = "environment variable GH_TOKEN"
+    elif os.getenv("ADMIN_TOKEN"):
+        token = os.getenv("ADMIN_TOKEN")
+        source = "environment variable ADMIN_TOKEN"
+    else:
+        # Fallback: GitHub CLI 'gh auth token'
+        try:
+            gh_token = subprocess.check_output(
+                ["gh", "auth", "token"],
+                stderr=subprocess.DEVNULL,
+            ).decode().strip()
+            if gh_token:
+                token = gh_token
+                source = "GitHub CLI ('gh auth token')"
+        except Exception:
+            pass
+
     if token:
         token = token.strip()
-        # Clean potential 'Bearer ' or 'token ' prefix if user accidentally included it
+        # Strip potential surrounding quotes (single or double)
+        if (token.startswith('"') and token.endswith('"')) or (token.startswith("'") and token.endswith("'")):
+            token = token[1:-1].strip()
+        # Clean potential 'Bearer ' or 'token ' prefix if accidentally included
         if token.startswith("Bearer "):
             token = token[7:].strip()
         elif token.startswith("token "):
             token = token[6:].strip()
-    return token
+
+    return token, source
 
 
 def get_api_headers(token: str):
@@ -145,7 +177,7 @@ def get_api_headers(token: str):
     }
 
 
-def handle_api_error(response, owner: str, repo: str):
+def handle_api_error(response, owner: str, repo: str, token: str = None, token_source: str = None):
     """
     Provide user-friendly, actionable error messages based on HTTP status code.
     """
@@ -159,6 +191,9 @@ def handle_api_error(response, owner: str, repo: str):
     if status == 401:
         print("❌ Error 401 (Unauthorized): Authentication failed.")
         print("   Please verify that your token is valid and not expired.")
+        if token_source:
+            masked = f"{token[:4]}...{token[-4:]}" if token and len(token) > 8 else "***"
+            print(f"   Token used: {masked} (length: {len(token) if token else 0}, source: {token_source})")
     elif status == 403:
         print(f"❌ Error 403 (Forbidden): Access denied for repository '{owner}/{repo}'.")
         print("   If using a Fine-grained Personal Access Token (github_pat_*):")
@@ -175,36 +210,36 @@ def handle_api_error(response, owner: str, repo: str):
         print(f"❌ Error {status}: {msg}")
 
 
-def fetch_topics(owner: str, repo: str, headers: dict) -> list:
+def fetch_topics(owner: str, repo: str, headers: dict, token: str = None, token_source: str = None) -> list:
     """
     Fetch current topics from GitHub API for a repository.
     """
     url = f"https://api.github.com/repos/{owner}/{repo}/topics"
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
-        handle_api_error(response, owner, repo)
+        handle_api_error(response, owner, repo, token, token_source)
         sys.exit(1)
     return response.json().get("names", [])
 
 
-def update_topics_api(owner: str, repo: str, headers: dict, topics: list) -> list:
+def update_topics_api(owner: str, repo: str, headers: dict, topics: list, token: str = None, token_source: str = None) -> list:
     """
     Replace topics for a repository on GitHub API.
     """
     url = f"https://api.github.com/repos/{owner}/{repo}/topics"
     response = requests.put(url, headers=headers, json={"names": topics})
     if response.status_code != 200:
-        handle_api_error(response, owner, repo)
+        handle_api_error(response, owner, repo, token, token_source)
         sys.exit(1)
     return response.json().get("names", topics)
 
 
-def add_topics(topics: list, token: str, owner: str, repo: str):
+def add_topics(topics: list, token: str, owner: str, repo: str, token_source: str = None):
     """
     Add one or more topics to the repository.
     """
     headers = get_api_headers(token)
-    current_topics = fetch_topics(owner, repo, headers)
+    current_topics = fetch_topics(owner, repo, headers, token, token_source)
 
     sanitized_new = []
     for t in topics:
@@ -226,17 +261,17 @@ def add_topics(topics: list, token: str, owner: str, repo: str):
         print(f"❌ Error: GitHub limits repositories to 20 topics max. Current ({len(current_topics)}) + New ({len(sanitized_new)}) = {len(updated_topics)}.")
         sys.exit(1)
 
-    result = update_topics_api(owner, repo, headers, updated_topics)
+    result = update_topics_api(owner, repo, headers, updated_topics, token, token_source)
     print(f"✅ Successfully added topic(s) [{', '.join(sanitized_new)}] to {owner}/{repo}")
     print(f"🏷️  Current topics ({len(result)}): {', '.join(result)}")
 
 
-def remove_topics(topics: list, token: str, owner: str, repo: str):
+def remove_topics(topics: list, token: str, owner: str, repo: str, token_source: str = None):
     """
     Remove one or more topics from the repository.
     """
     headers = get_api_headers(token)
-    current_topics = fetch_topics(owner, repo, headers)
+    current_topics = fetch_topics(owner, repo, headers, token, token_source)
 
     sanitized_to_remove = [sanitize_topic(t) for t in topics]
     topics_to_keep = [t for t in current_topics if t not in sanitized_to_remove]
@@ -247,17 +282,17 @@ def remove_topics(topics: list, token: str, owner: str, repo: str):
         print(f"Current topics: {', '.join(current_topics) if current_topics else '(none)'}")
         return
 
-    result = update_topics_api(owner, repo, headers, topics_to_keep)
+    result = update_topics_api(owner, repo, headers, topics_to_keep, token, token_source)
     print(f"✅ Successfully removed topic(s) [{', '.join(removed)}] from {owner}/{repo}")
     print(f"🏷️  Current topics ({len(result)}): {', '.join(result) if result else '(none)'}")
 
 
-def list_topics(token: str, owner: str, repo: str):
+def list_topics(token: str, owner: str, repo: str, token_source: str = None):
     """
     List current topics for the repository.
     """
     headers = get_api_headers(token)
-    topics = fetch_topics(owner, repo, headers)
+    topics = fetch_topics(owner, repo, headers, token, token_source)
     print(f"🏷️  Topics for {owner}/{repo} ({len(topics)}):")
     if topics:
         for t in topics:
@@ -288,7 +323,7 @@ def main():
     parser.add_argument(
         "-t",
         "--token",
-        help="GitHub Access Token (default: ADMIN_TOKEN / GITHUB_TOKEN in .env or environment)",
+        help="GitHub Access Token (default: GITHUB_TOKEN / GH_TOKEN / ADMIN_TOKEN in .env or environment, or gh CLI)",
     )
     parser.add_argument(
         "-u",
@@ -325,11 +360,11 @@ def main():
     default_owner, default_repo = get_default_repo_info()
     owner = args.username or default_owner
     repo = args.reponame or default_repo
-    token = get_auth_token(args.token)
+    token, token_source = get_auth_token(args.token)
 
     if not token:
         print("❌ Error: GitHub Access Token is required.")
-        print("   Provide it via --token, or set ADMIN_TOKEN / GITHUB_TOKEN / GH_TOKEN in .env or environment.")
+        print("   Provide it via --token, or set GITHUB_TOKEN / GH_TOKEN in environment / .env, or login via 'gh auth login'.")
         sys.exit(1)
 
     if not owner:
@@ -351,18 +386,18 @@ def main():
             raw_topics.append(item.strip())
 
     if args.list:
-        list_topics(token, owner, repo)
+        list_topics(token, owner, repo, token_source=token_source)
     elif args.remove:
         if not raw_topics:
             print("❌ Error: Specify at least one topic to remove.")
             sys.exit(1)
-        remove_topics(raw_topics, token, owner, repo)
+        remove_topics(raw_topics, token, owner, repo, token_source=token_source)
     else:
         if not raw_topics:
             parser.print_help()
             print("\n❌ Error: Please provide at least one topic to add, or use --list (-l) to view topics.")
             sys.exit(1)
-        add_topics(raw_topics, token, owner, repo)
+        add_topics(raw_topics, token, owner, repo, token_source=token_source)
 
 
 if __name__ == "__main__":
