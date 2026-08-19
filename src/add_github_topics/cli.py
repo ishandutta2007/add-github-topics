@@ -37,10 +37,14 @@ def get_default_repo_info():
     """
     # 1. Try git remote get-url origin
     try:
-        remote_url = subprocess.check_output(
-            ["git", "remote", "get-url", "origin"],
-            stderr=subprocess.DEVNULL,
-        ).decode().strip()
+        remote_url = (
+            subprocess.check_output(
+                ["git", "remote", "get-url", "origin"],
+                stderr=subprocess.DEVNULL,
+            )
+            .decode()
+            .strip()
+        )
         owner, repo = parse_git_remote_url(remote_url)
         if owner and repo:
             return owner, repo
@@ -64,10 +68,14 @@ def get_default_repo_info():
     # 3. Fallback: repo name from git root directory or current directory
     repo_name = None
     try:
-        git_root = subprocess.check_output(
-            ["git", "rev-parse", "--show-toplevel"],
-            stderr=subprocess.DEVNULL,
-        ).decode().strip()
+        git_root = (
+            subprocess.check_output(
+                ["git", "rev-parse", "--show-toplevel"],
+                stderr=subprocess.DEVNULL,
+            )
+            .decode()
+            .strip()
+        )
         if git_root:
             repo_name = os.path.basename(git_root)
     except Exception:
@@ -79,10 +87,14 @@ def get_default_repo_info():
     # Fallback username from git config github.user
     username = None
     try:
-        username = subprocess.check_output(
-            ["git", "config", "github.user"],
-            stderr=subprocess.DEVNULL,
-        ).decode().strip()
+        username = (
+            subprocess.check_output(
+                ["git", "config", "github.user"],
+                stderr=subprocess.DEVNULL,
+            )
+            .decode()
+            .strip()
+        )
     except Exception:
         pass
 
@@ -137,10 +149,14 @@ def get_auth_token(cli_token=None):
     else:
         # Fallback: GitHub CLI 'gh auth token'
         try:
-            gh_token = subprocess.check_output(
-                ["gh", "auth", "token"],
-                stderr=subprocess.DEVNULL,
-            ).decode().strip()
+            gh_token = (
+                subprocess.check_output(
+                    ["gh", "auth", "token"],
+                    stderr=subprocess.DEVNULL,
+                )
+                .decode()
+                .strip()
+            )
             if gh_token:
                 token = gh_token
                 source = "GitHub CLI ('gh auth token')"
@@ -150,7 +166,9 @@ def get_auth_token(cli_token=None):
     if token:
         token = token.strip()
         # Strip potential surrounding quotes (single or double)
-        if (token.startswith('"') and token.endswith('"')) or (token.startswith("'") and token.endswith("'")):
+        if (token.startswith('"') and token.endswith('"')) or (
+            token.startswith("'") and token.endswith("'")
+        ):
             token = token[1:-1].strip()
         # Clean potential 'Bearer ' or 'token ' prefix if accidentally included
         if token.startswith("Bearer "):
@@ -177,7 +195,9 @@ def get_api_headers(token: str):
     }
 
 
-def handle_api_error(response, owner: str, repo: str, token: str = None, token_source: str = None):
+def handle_api_error(
+    response, owner: str, repo: str, token: str = None, token_source: str = None
+):
     """
     Provide user-friendly, actionable error messages based on HTTP status code.
     """
@@ -192,25 +212,39 @@ def handle_api_error(response, owner: str, repo: str, token: str = None, token_s
         print("❌ Error 401 (Unauthorized): Authentication failed.")
         print("   Please verify that your token is valid and not expired.")
         if token_source:
-            masked = f"{token[:4]}...{token[-4:]}" if token and len(token) > 8 else "***"
-            print(f"   Token used: {masked} (length: {len(token) if token else 0}, source: {token_source})")
+            masked = (
+                f"{token[:4]}...{token[-4:]}" if token and len(token) > 8 else "***"
+            )
+            print(
+                f"   Token used: {masked} (length: {len(token) if token else 0}, source: {token_source})"
+            )
     elif status == 403:
-        print(f"❌ Error 403 (Forbidden): Access denied for repository '{owner}/{repo}'.")
+        print(
+            f"❌ Error 403 (Forbidden): Access denied for repository '{owner}/{repo}'."
+        )
         print("   If using a Fine-grained Personal Access Token (github_pat_*):")
         print("   1. Ensure the token has access to this repository.")
-        print("   2. Ensure Repository Permissions -> 'Administration' is set to 'Read and write'.")
+        print(
+            "   2. Ensure Repository Permissions -> 'Administration' is set to 'Read and write'."
+        )
     elif status == 404:
         print(f"❌ Error 404 (Not Found): Repository '{owner}/{repo}' not found.")
         print("   Please check the username/owner and repository name.")
-        print("   Ensure your token has permission to access private repositories if applicable.")
+        print(
+            "   Ensure your token has permission to access private repositories if applicable."
+        )
     elif status == 422:
         print(f"❌ Error 422 (Unprocessable Entity): {msg}")
-        print("   Topics must contain only lowercase letters, numbers, and hyphens (max 50 chars, max 20 topics).")
+        print(
+            "   Topics must contain only lowercase letters, numbers, and hyphens (max 50 chars, max 20 topics)."
+        )
     else:
         print(f"❌ Error {status}: {msg}")
 
 
-def fetch_topics(owner: str, repo: str, headers: dict, token: str = None, token_source: str = None) -> list:
+def fetch_topics(
+    owner: str, repo: str, headers: dict, token: str = None, token_source: str = None
+) -> list:
     """
     Fetch current topics from GitHub API for a repository.
     """
@@ -222,7 +256,14 @@ def fetch_topics(owner: str, repo: str, headers: dict, token: str = None, token_
     return response.json().get("names", [])
 
 
-def update_topics_api(owner: str, repo: str, headers: dict, topics: list, token: str = None, token_source: str = None) -> list:
+def update_topics_api(
+    owner: str,
+    repo: str,
+    headers: dict,
+    topics: list,
+    token: str = None,
+    token_source: str = None,
+) -> list:
     """
     Replace topics for a repository on GitHub API.
     """
@@ -234,7 +275,9 @@ def update_topics_api(owner: str, repo: str, headers: dict, topics: list, token:
     return response.json().get("names", topics)
 
 
-def add_topics(topics: list, token: str, owner: str, repo: str, token_source: str = None):
+def add_topics(
+    topics: list, token: str, owner: str, repo: str, token_source: str = None
+):
     """
     Add one or more topics to the repository.
     """
@@ -253,20 +296,30 @@ def add_topics(topics: list, token: str, owner: str, repo: str, token_source: st
             sanitized_new.append(clean_t)
 
     if not sanitized_new:
-        print(f"No new topics to add. Current topics: {', '.join(current_topics) if current_topics else '(none)'}")
+        print(
+            f"No new topics to add. Current topics: {', '.join(current_topics) if current_topics else '(none)'}"
+        )
         return
 
     updated_topics = current_topics + sanitized_new
     if len(updated_topics) > 20:
-        print(f"❌ Error: GitHub limits repositories to 20 topics max. Current ({len(current_topics)}) + New ({len(sanitized_new)}) = {len(updated_topics)}.")
+        print(
+            f"❌ Error: GitHub limits repositories to 20 topics max. Current ({len(current_topics)}) + New ({len(sanitized_new)}) = {len(updated_topics)}."
+        )
         sys.exit(1)
 
-    result = update_topics_api(owner, repo, headers, updated_topics, token, token_source)
-    print(f"✅ Successfully added topic(s) [{', '.join(sanitized_new)}] to {owner}/{repo}")
+    result = update_topics_api(
+        owner, repo, headers, updated_topics, token, token_source
+    )
+    print(
+        f"✅ Successfully added topic(s) [{', '.join(sanitized_new)}] to {owner}/{repo}"
+    )
     print(f"🏷️  Current topics ({len(result)}): {', '.join(result)}")
 
 
-def remove_topics(topics: list, token: str, owner: str, repo: str, token_source: str = None):
+def remove_topics(
+    topics: list, token: str, owner: str, repo: str, token_source: str = None
+):
     """
     Remove one or more topics from the repository.
     """
@@ -278,13 +331,23 @@ def remove_topics(topics: list, token: str, owner: str, repo: str, token_source:
 
     removed = [t for t in current_topics if t in sanitized_to_remove]
     if not removed:
-        print(f"ℹ️ None of the specified topics {sanitized_to_remove} were found in {owner}/{repo}.")
-        print(f"Current topics: {', '.join(current_topics) if current_topics else '(none)'}")
+        print(
+            f"ℹ️ None of the specified topics {sanitized_to_remove} were found in {owner}/{repo}."
+        )
+        print(
+            f"Current topics: {', '.join(current_topics) if current_topics else '(none)'}"
+        )
         return
 
-    result = update_topics_api(owner, repo, headers, topics_to_keep, token, token_source)
-    print(f"✅ Successfully removed topic(s) [{', '.join(removed)}] from {owner}/{repo}")
-    print(f"🏷️  Current topics ({len(result)}): {', '.join(result) if result else '(none)'}")
+    result = update_topics_api(
+        owner, repo, headers, topics_to_keep, token, token_source
+    )
+    print(
+        f"✅ Successfully removed topic(s) [{', '.join(removed)}] from {owner}/{repo}"
+    )
+    print(
+        f"🏷️  Current topics ({len(result)}): {', '.join(result) if result else '(none)'}"
+    )
 
 
 def list_topics(token: str, owner: str, repo: str, token_source: str = None):
@@ -364,12 +427,16 @@ def main():
 
     if not token:
         print("❌ Error: GitHub Access Token is required.")
-        print("   Provide it via --token, or set GITHUB_TOKEN / GH_TOKEN in environment / .env, or login via 'gh auth login'.")
+        print(
+            "   Provide it via --token, or set GITHUB_TOKEN / GH_TOKEN in environment / .env, or login via 'gh auth login'."
+        )
         sys.exit(1)
 
     if not owner:
         print("❌ Error: GitHub repository owner/username is required.")
-        print("   Provide it via --username/--owner, or run within a git repo with a GitHub remote configured.")
+        print(
+            "   Provide it via --username/--owner, or run within a git repo with a GitHub remote configured."
+        )
         sys.exit(1)
 
     if not repo:
@@ -395,7 +462,9 @@ def main():
     else:
         if not raw_topics:
             parser.print_help()
-            print("\n❌ Error: Please provide at least one topic to add, or use --list (-l) to view topics.")
+            print(
+                "\n❌ Error: Please provide at least one topic to add, or use --list (-l) to view topics."
+            )
             sys.exit(1)
         add_topics(raw_topics, token, owner, repo, token_source=token_source)
 
