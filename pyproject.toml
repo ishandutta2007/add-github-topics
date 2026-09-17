@@ -22,8 +22,10 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/ishandutta2007/add-github-topics"
-"Bug Tracker" = "https://github.com/ishandutta2007/add-github-topics/issues"
+Homepage = "https://github.com/ishandutta2007/add-github-topics"
+Issues = "https://github.com/ishandutta2007/add-github-topics/issues"
+Repository = "https://github.com/ishandutta2007/add-github-topics"
+Documentation = "https://github.com/ishandutta2007/add-github-topics#readme"
 
 [project.scripts]
 add-github-topic = "add_github_topics.cli:main"
