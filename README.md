@@ -79,66 +79,130 @@ Run the command from within any git repository:
 add-github-topic python
 ```
 
-## 📖 Detailed Usage Guide
+## 📚 Documentation & Guides
+
+---
+
+### 👤 For Users
+
+#### 1. Installation 📦
+
+Install the latest release directly from PyPI:
 
 ```bash
-add-github-topic <topic> [options]
+pip install add-github-topics
 ```
 
-### Options Explained
+#### 2. Configuration ⚙️
 
-| Option | Shortcut | Description | Default |
-| :--- | :--- | :--- | :--- |
-| `topics` | - | One or more topics to add (space- or comma-separated). | - |
-| `--token` | `-t` | Your GitHub Personal Access Token. | `GITHUB_TOKEN`, `GH_TOKEN`, `ADMIN_TOKEN` (environment / `.env`), or `gh auth token` |
-| `--username`, `--owner` | `-u` | Your GitHub username / organization. | Auto-detected from `git remote origin` |
-| `--reponame`, `--repo` | `-r` | Target repository name. | Auto-detected from `git remote origin` |
-| `--list` | `-l` | List all current topics for the repository. | `false` |
-| `--remove` | `-d` | Remove the specified topic(s) instead of adding. | `false` |
+Set your GitHub token using any of the following methods (listed in order of evaluation priority):
 
-### Examples 📝
+1. **CLI Flag:**
+   ```bash
+   add-github-topic python --token ghp_your_token_here
+   ```
+2. **Environment Variable:**
+   - **Linux / macOS (Bash/Zsh):**
+     ```bash
+     export GITHUB_TOKEN=ghp_your_token_here
+     ```
+   - **Windows (PowerShell):**
+     ```powershell
+     $env:GITHUB_TOKEN = "ghp_your_token_here"
+     ```
+3. **Local `.env` File:**
+   Create a `.env` file in your repository or home directory:
+   ```env
+   GITHUB_TOKEN=ghp_your_token_here
+   ```
+   *(Supports `GITHUB_TOKEN`, `GH_TOKEN`, and `ADMIN_TOKEN`)*
+4. **GitHub CLI Integration:**
+   If logged into the [GitHub CLI (`gh`)](https://cli.github.com/), `add-github-topic` automatically obtains credentials via `gh auth token`.
 
-**Add a single topic:**
+#### 3. Common Commands 🛠️
+
 ```bash
-add-github-topic python
-```
+# Add single or multiple topics
+add-github-topic python machine-learning devops
 
-**Add multiple topics in one go:**
-```bash
-add-github-topic automation cli-tool devops
-# or comma-separated
-add-github-topic python,fastapi,docker
-```
-
-**List current topics:**
-```bash
+# List current repository topics
 add-github-topic --list
+
+# Remove existing topics
+add-github-topic --remove legacy-tag
+
+# Target a specific remote repository
+add-github-topic python --owner ishandutta2007 --repo awesome-project
 ```
 
-**Remove topics:**
-```bash
-add-github-topic --remove cli-tool
-```
+---
 
-**Target a specific repository and user/org:**
-```bash
-add-github-topic machine-learning --username ishandutta2007 --reponame awesome-ml-project
-```
+### 💻 For Developers & Contributors
 
-## 🛠️ Development & Contributions
+We welcome contributions to `add-github-topics`!
 
-Contributions are welcome! If you'd like to improve this tool:
+#### 1. Local Development Setup 🛠️
 
-1. Clone the repo: `git clone https://github.com/ishandutta2007/add-github-topics.git`
-2. Install in editable mode: `pip install -e .`
-3. Submit a Pull Request!
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/ishandutta2007/add-github-topics.git
+   cd add-github-topics
+   ```
 
+2. **Set Up Virtual Environment:**
+   ```bash
+   python -m venv venv
+   # On Linux/macOS:
+   source venv/bin/activate
+   # On Windows:
+   .\venv\Scripts\activate
+   ```
 
-## 🛠️ Publish to PYPI
+3. **Install Editable Package:**
+   ```bash
+   pip install -e .
+   ```
 
-```
-git tag v0.2.0 && git push origin v0.2.0
-```
+#### 2. Code Structure & Guidelines 📐
+
+- Main entrypoint CLI: `src/add_github_topics/cli.py`
+- Follow PEP 8 style guidelines.
+- Test your changes locally before submitting a PR.
+
+---
+
+### 🚀 For Package Publishers & DevOps
+
+#### Automated PyPI Publishing 📦
+
+The project uses GitHub Actions with **PyPI Trusted Publishing (OIDC)** for automated releases.
+
+#### How Version Release & Auto-Publishing Works:
+
+1. **Version Bump Workflow (Automated on Push):**
+   - Whenever you increment the version in `pyproject.toml` (e.g. `version = "0.2.2"`) and push your commit to `main` or `master`:
+     ```toml
+     [project]
+     version = "0.2.2"
+     ```
+   - The `.github/workflows/publish.yml` workflow triggers automatically.
+   - It builds the package source & wheel and attempts to publish to PyPI.
+   - **Idempotency (`skip-existing: true`):** If the version has already been published to PyPI, the publish action skips safely without failing.
+
+2. **Git Tag Workflow:**
+   - Tagged releases (e.g. `v0.2.2`) pushed to GitHub will also trigger auto-publishing:
+     ```bash
+     git tag v0.2.2
+     git push origin v0.2.2
+     ```
+
+3. **Manual Trigger (`workflow_dispatch`):**
+   - You can also trigger a release manually via the **Actions** tab in GitHub.
+
+#### DevOps Initial Setup Checklist (One-time):
+
+- Configure PyPI Trusted Publisher for repository `ishandutta2007/add-github-topics`.
+- Create environment `pypi` under GitHub Repository Settings -> Environments.
 
 ---
 
