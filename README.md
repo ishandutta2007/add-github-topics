@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="Add GitHub Topics Banner" width="800">
+  <a href="https://github.com/ishandutta2007/add-github-topics">
+    <img src="assets/banner.svg" alt="Add GitHub Topics Banner" width="100%">
+  </a>
 </p>
 
 <h1 align="center">🚀 Add GitHub Topics CLI 🏷️</h1>
@@ -165,9 +167,16 @@ We welcome contributions to `add-github-topics`!
 
 #### 2. Code Structure & Guidelines 📐
 
-- Main entrypoint CLI: `src/add_github_topics/cli.py`
-- Follow PEP 8 style guidelines.
-- Test your changes locally before submitting a PR.
+The codebase is organized into decoupled, modular components under `src/add_github_topics/`:
+
+- **[`cli.py`](src/add_github_topics/cli.py):** Main CLI orchestration and execution entrypoint.
+- **[`parser.py`](src/add_github_topics/parser.py):** Command-line interface definitions, flags, and argument parsing.
+- **[`api.py`](src/add_github_topics/api.py):** GitHub REST API operations (fetching, updating, adding, removing, and listing topics).
+- **[`git.py`](src/add_github_topics/git.py):** Local git repository detection and remote URL resolution.
+- **[`auth.py`](src/add_github_topics/auth.py):** Authentication token resolution (CLI flags, `.env`, env vars, `gh auth token`).
+- **[`utils.py`](src/add_github_topics/utils.py):** Topic validation and sanitization utilities.
+
+Please follow PEP 8 style guidelines and test changes locally before submitting a PR.
 
 ---
 
