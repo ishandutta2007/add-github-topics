@@ -16,7 +16,7 @@
   <a href="https://pypi.org/project/add-github-topics/"><img alt="PyPI version" src="https://img.shields.io/pypi/v/add-github-topics.svg?color=blue" /></a>
   <a href="https://pypi.org/project/add-github-topics/"><img alt="Python versions" src="https://img.shields.io/pypi/pyversions/add-github-topics.svg" /></a>
   <a href="https://github.com/ishandutta2007/add-github-topics/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" /></a>
-  <a href="https://github.com/ishandutta2007/add-github-topics/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/ishandutta2007/add-github-topics?style=social" /></a>
+  <a href="https://github.com/ishandutta2007/add-github-topics/stargazers"><img alt="GitHub_Stars" src="https://img.shields.io/github/stars/ishandutta2007/add-github-topics?style=social" /></a>
   <a href="https://github.com/ishandutta2007"><img alt="GitHub followers" src="https://img.shields.io/github/followers/ishandutta2007?label=Follow" /></a>
 </p>
 
@@ -246,3 +246,12 @@ Every bit of support helps keep open-source projects thriving! ✨
 <p align="center">
   Made with ❤️ by <a href="https://github.com/ishandutta2007">Ishan Dutta</a>
 </p>
+
+## ⭐ Star History
+
+<a href="https://star-history.com/#ishandutta2007/add-github-topics&Timeline" align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/ishandutta2007_add-github-topics_growth.svg">
+    <img alt="Star History Chart" src="assets/ishandutta2007_add-github-topics_growth.svg">
+  </picture>
+</a>
